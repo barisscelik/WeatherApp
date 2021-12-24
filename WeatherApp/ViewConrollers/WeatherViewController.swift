@@ -61,7 +61,7 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         weatherCollectionView.frame = CGRect(x: 0,
                                              y: (view.frame.size.height) - 300.0,
                                              width: view.frame.size.width,
-                                             height: 220gradient.colors = [UIColor.white.cgColor, UIColor.systemBlue.cgColor])
+                                             height: 220)
     }
 
     private func setGradientBackGround(to view: UIView) {
