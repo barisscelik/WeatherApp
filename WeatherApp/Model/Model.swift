@@ -20,3 +20,14 @@ struct AirTemp: Codable {
     let noaa: String
     let sg: String
 }
+
+struct WeatherViewModel {
+    let airTemp: String
+    let time: String
+    let dayTime: DayTime
+}
+
+enum DayTime {
+    case day
+    case night
+}

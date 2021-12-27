@@ -34,6 +34,8 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     private let locationManager = CLLocationManager()
     private var currentLocation : CLLocation?
     
+    var models = [WeatherViewModel]()
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.tintColor = .white
@@ -84,7 +86,7 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         if !locations.isEmpty, currentLocation == nil {
             currentLocation = locations.first
             locationManager.stopUpdatingLocation()
-            //requestWeatherForLocation()
+            requestWeatherForLocation()
         }
     }
     
@@ -96,11 +98,36 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         let latitude = currentLocation.coordinate.latitude
         let longitude = currentLocation.coordinate.longitude
         
-        WeatherAPI.shared.fetchData(latitude: latitude, longitude: longitude) { response in
+        WeatherAPI.shared.fetchData(latitude: latitude, longitude: longitude) { [weak self] response in
             guard let response = response else {
                 return
             }
+            response.hours.forEach { data in
+                let isoFormatter = ISO8601DateFormatter()
+                isoFormatter.timeZone = TimeZone(abbreviation: "GMT")
+                let date = isoFormatter.date(from: data.time) ?? Date()
+                let formatter = DateFormatter()
+                formatter.timeZone = TimeZone(abbreviation: "UTC+03")
+                formatter.locale = NSLocale.current
+                formatter.dateFormat = "HH:mm"
+                let time = formatter.string(from: date)
+                
+                let seperatorTime = formatter.date(from: "18:00") ?? Date()
+                
+                let dayTime : DayTime = date < seperatorTime ? .day : .night
+                
+                let numberFormatter = NumberFormatter()
+                numberFormatter.numberStyle = .none
+                let number = numberFormatter.number(from: data.airTemperature.noaa) ?? 0
+                let airTemp = numberFormatter.string(from: number) ?? ""
+                
+                self?.models.append(WeatherViewModel(airTemp: airTemp, time: time, dayTime: dayTime))
+                
+            }
             
+            DispatchQueue.main.async {
+                self?.weatherCollectionView.reloadData()
+            }
             
         }
     }
@@ -108,14 +135,16 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
 
 extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataSource, UICollectionViewDelegateFlowLayout {
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return 10
+        return models.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        let model = models[indexPath.item]
         guard let cell = collectionView.dequeueReusableCell(withReuseIdentifier: WeatherCollectionViewCell.identifier,
                                                             for: indexPath) as? WeatherCollectionViewCell else {
             fatalError()
         }
+        cell.configure(with: model)
         return cell
     }
     
