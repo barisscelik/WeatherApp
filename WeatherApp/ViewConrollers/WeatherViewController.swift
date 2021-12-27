@@ -98,6 +98,17 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         let latitude = currentLocation.coordinate.latitude
         let longitude = currentLocation.coordinate.longitude
         
+        if UserDefaults.standard.bool(forKey: String.rawDateFormat()) {
+            guard let viewModels = UserDefaults.standard.value(forKey: "model") as? [WeatherViewModel] else {
+                return
+            }
+            models = viewModels
+            
+            DispatchQueue.main.async { [weak self] in
+                self?.weatherCollectionView.reloadData()
+            }
+        }
+        
         WeatherAPI.shared.fetchData(latitude: latitude, longitude: longitude) { [weak self] response in
             guard let response = response else {
                 return
@@ -124,6 +135,8 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 self?.models.append(WeatherViewModel(airTemp: airTemp, time: time, dayTime: dayTime))
                 
             }
+            
+            UserDefaults.standard.set(self?.models, forKey: "model")
             
             DispatchQueue.main.async {
                 self?.weatherCollectionView.reloadData()

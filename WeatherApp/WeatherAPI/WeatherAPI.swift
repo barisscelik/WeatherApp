@@ -23,23 +23,17 @@ final class WeatherAPI {
     func fetchData(latitude: Double,
                    longitude: Double,
                    completion: @escaping ((WeatherResponse?) -> Void)) {
-        let date = Date()
         let isoDateFormatter = ISO8601DateFormatter()
         isoDateFormatter.timeZone = TimeZone(abbreviation: "GMT") //Set timezone that you want
-        let startDate = isoDateFormatter.string(from: date)
+        let startDate = isoDateFormatter.string(from: Date())
         let dateFormatter = DateFormatter()
         dateFormatter.locale = NSLocale.current
-        dateFormatter.dateFormat = "yyyy-MM-dd"
-        let rawDate = dateFormatter.string(from: date)
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        guard let endTime = dateFormatter.date(from: "\(rawDate) 23:00") else {
+        guard let endTime = dateFormatter.date(from: "\(String.rawDateFormat()) 23:00") else {
             return
         }
         let endDate = isoDateFormatter.string(from: endTime)
-        
-        print("\n\n\(startDate)\n\n")
-        print("\n\n\(endDate)\n\n")
-        
+            
         let urlString = Constants.baseUrl + "lat=\(latitude)&" + "lng=\(longitude)&" + "start=\(startDate)&"
                         + "end=\(endDate)&" + Constants.airTemperatureString
         if let url = URL(string: urlString) {
@@ -58,6 +52,7 @@ final class WeatherAPI {
                     print(result)
 //                    let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
 //                    completion(response)
+                    UserDefaults.standard.set(true, forKey: String.rawDateFormat())
                 } catch {
                     print(error.localizedDescription)
                     completion(nil)
