@@ -27,6 +27,7 @@ final class WeatherAPI {
         isoDateFormatter.timeZone = TimeZone(abbreviation: "GMT") //Set timezone that you want
         let startDate = isoDateFormatter.string(from: Date())
         let dateFormatter = DateFormatter()
+        dateFormatter.timeZone = TimeZone(abbreviation: "UTC+03")
         dateFormatter.locale = NSLocale.current
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
         guard let endTime = dateFormatter.date(from: "\(String.rawDateFormat()) 23:00") else {
@@ -41,20 +42,20 @@ final class WeatherAPI {
             request.addValue(Constants.apiKey, forHTTPHeaderField: Constants.headerParam)
             request.httpMethod = "GET"
             
-            let task = URLSession.shared.dataTask(with: request) { data, _, error in
+            let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 guard let data = data, error == nil else {
                     completion(nil)
                     return
                 }
-                
                 do {
-                    let result = try JSONSerialization.jsonObject(with: data, options: .fragmentsAllowed)
-                    print(result)
-//                    let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
-//                    completion(response)
+//                    let result = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
+//                    print(result)
+                    let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
+                    print(response)
+                    completion(response)
                     UserDefaults.standard.set(true, forKey: String.rawDateFormat())
                 } catch {
-                    print(error.localizedDescription)
+                    print(error)
                     completion(nil)
                 }
 

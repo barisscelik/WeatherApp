@@ -129,7 +129,7 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 
                 let numberFormatter = NumberFormatter()
                 numberFormatter.numberStyle = .none
-                let number = numberFormatter.number(from: data.airTemperature.noaa) ?? 0
+                let number = numberFormatter.number(from: "\(data.airTemperature.noaa)") ?? 0
                 let airTemp = numberFormatter.string(from: number) ?? ""
                 
                 self?.models.append(WeatherViewModel(airTemp: airTemp, time: time, dayTime: dayTime))

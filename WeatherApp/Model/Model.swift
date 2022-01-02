@@ -17,8 +17,7 @@ struct Hours: Codable {
 }
 
 struct AirTemp: Codable {
-    let noaa: String
-    let sg: String
+    let noaa: Double
 }
 
 struct WeatherViewModel {
