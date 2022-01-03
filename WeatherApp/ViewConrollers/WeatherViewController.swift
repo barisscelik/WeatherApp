@@ -95,25 +95,29 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
             return
         }
         
-        let latitude = currentLocation.coordinate.latitude
-        let longitude = currentLocation.coordinate.longitude
-        
         if UserDefaults.standard.bool(forKey: String.rawDateFormat()) {
-            guard let viewModels = UserDefaults.standard.value(forKey: "model") as? [WeatherViewModel] else {
+            guard let viewModelString = UserDefaults.standard.string(forKey: "model"),
+                  let viewModel = JSONUtils.jsonDecoder(param: viewModelString, object: [WeatherViewModel].self)  else {
                 return
             }
-            models = viewModels
+            models = viewModel
             
             DispatchQueue.main.async { [weak self] in
                 self?.weatherCollectionView.reloadData()
             }
+            return
         }
+        
+        let latitude = currentLocation.coordinate.latitude
+        let longitude = currentLocation.coordinate.longitude
         
         WeatherAPI.shared.fetchData(latitude: latitude, longitude: longitude) { [weak self] response in
             guard let response = response else {
                 return
             }
+            let group = DispatchGroup()
             response.hours.forEach { data in
+                group.enter()
                 let isoFormatter = ISO8601DateFormatter()
                 isoFormatter.timeZone = TimeZone(abbreviation: "GMT")
                 let date = isoFormatter.date(from: data.time) ?? Date()
@@ -133,12 +137,12 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 let airTemp = numberFormatter.string(from: number) ?? ""
                 
                 self?.models.append(WeatherViewModel(airTemp: airTemp, time: time, dayTime: dayTime))
-                
+                group.leave()
             }
             
-            UserDefaults.standard.set(self?.models, forKey: "model")
-            
-            DispatchQueue.main.async {
+            group.notify(queue: .main) {
+                let modelEncoded = JSONUtils.jsonEncoder(data: self?.models)
+                UserDefaults.standard.set(modelEncoded, forKey: "model")
                 self?.weatherCollectionView.reloadData()
             }
             

@@ -13,11 +13,16 @@ final class WeatherAPI {
     
     private init() {}
     
-    struct Constants {
+    private struct Constants {
         static let apiKey = "0071f670-6402-11ec-81ce-0242ac130002-0071f6e8-6402-11ec-81ce-0242ac130002"
         static let baseUrl = "https://api.stormglass.io/v2/weather/point?"
         static let airTemperatureString = "params=airTemperature"
         static let headerParam = "Authorization"
+    }
+    
+    private enum HTTPMethod: String {
+        case get = "GET"
+        case post = "POST"
     }
     
     func fetchData(latitude: Double,
@@ -40,7 +45,7 @@ final class WeatherAPI {
         if let url = URL(string: urlString) {
             var request = URLRequest(url: url)
             request.addValue(Constants.apiKey, forHTTPHeaderField: Constants.headerParam)
-            request.httpMethod = "GET"
+            request.httpMethod = HTTPMethod.get.rawValue
             
             let task = URLSession.shared.dataTask(with: request) { data, response, error in
                 guard let data = data, error == nil else {
@@ -51,9 +56,8 @@ final class WeatherAPI {
 //                    let result = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
 //                    print(result)
                     let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
-                    print(response)
-                    completion(response)
                     UserDefaults.standard.set(true, forKey: String.rawDateFormat())
+                    completion(response)
                 } catch {
                     print(error)
                     completion(nil)
