@@ -25,6 +25,7 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collection.register(WeatherCollectionViewCell.self,
                             forCellWithReuseIdentifier: WeatherCollectionViewCell.identifier)
+        collection.prefetchDataSource = .none
         collection.showsHorizontalScrollIndicator = false
         return collection
     }()
@@ -127,7 +128,8 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 formatter.dateFormat = "HH:mm"
                 let time = formatter.string(from: date)
                 
-                let seperatorTime = formatter.date(from: "18:00") ?? Date()
+                formatter.dateFormat = "yyyy-MM-dd HH:mm"
+                let seperatorTime = formatter.date(from: "\(String.rawDateFormat()) 18:00") ?? Date()
                 
                 let dayTime : DayTime = date < seperatorTime ? .day : .night
                 

@@ -11,6 +11,18 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     
     static let identifier = "WeatherCollectionViewCell"
     
+    private let weatherMap: [DayTime : [String]] = {
+        var dict = [DayTime : [String]]()
+        dict[.day] = ["sun.and.horizon", "sun.haze", "sun.dust",
+                      "cloud", "cloud.rain", "cloud.sun",
+                      "cloud.sun.rain", "snowflake"]
+        dict[.night] = ["snowflake", "wind.snow", "cloud.moon.rain",
+                        "cloud.moon.bolt", "smoke", "moon.stars",
+                        "moon"]
+        
+        return dict
+    }()
+    
     private let cellLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 20, weight: .semibold)
@@ -22,7 +34,6 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     private let cellImageView: UIImageView = {
         let imageView = UIImageView()
         imageView.tintColor = .white
-        imageView.image = UIImage(systemName: "moon.stars")
         return imageView
     }()
     
@@ -65,6 +76,7 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     
     override func prepareForReuse() {
         super.prepareForReuse()
+        
     }
     
     // MARK: - Configuration
@@ -73,10 +85,12 @@ class WeatherCollectionViewCell: UICollectionViewCell {
         cellLabel.text = viewModel.airTemp
         switch viewModel.dayTime {
         case .day:
-            gradient.colors = [UIColor.white.cgColor, UIColor.black.cgColor]
-        case.night:
             gradient.colors = [UIColor.white.cgColor, UIColor.systemBlue.cgColor]
+        case.night:
+            gradient.colors = [UIColor.white.cgColor, UIColor.black.cgColor]
         }
+        
+        cellImageView.image = UIImage(systemName: (weatherMap[viewModel.dayTime]?.randomElement()) ?? "cloud")
     }
     
 }
