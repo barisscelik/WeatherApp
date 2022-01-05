@@ -29,6 +29,7 @@ struct WeatherViewModel: Codable {
 
 enum DayTime: Codable {
     case day
+    case afternoon
     case night
 }
 

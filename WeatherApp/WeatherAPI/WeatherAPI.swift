@@ -28,16 +28,18 @@ final class WeatherAPI {
     func fetchData(latitude: Double,
                    longitude: Double,
                    completion: @escaping ((WeatherResponse?) -> Void)) {
+        
         let isoDateFormatter = ISO8601DateFormatter()
         isoDateFormatter.timeZone = TimeZone(abbreviation: "GMT") //Set timezone that you want
-        let startDate = isoDateFormatter.string(from: Date())
         let dateFormatter = DateFormatter()
         dateFormatter.timeZone = TimeZone(abbreviation: "UTC+03")
         dateFormatter.locale = NSLocale.current
         dateFormatter.dateFormat = "yyyy-MM-dd HH:mm"
-        guard let endTime = dateFormatter.date(from: "\(String.rawDateFormat()) 23:00") else {
+        guard let endTime = dateFormatter.date(from: "\(String.rawDateFormat()) 23:00"),
+              let startTime = dateFormatter.date(from: "\(String.rawDateFormat()) 06:00")  else {
             return
         }
+        let startDate = isoDateFormatter.string(from: startTime)
         let endDate = isoDateFormatter.string(from: endTime)
             
         let urlString = Constants.baseUrl + "lat=\(latitude)&" + "lng=\(longitude)&" + "start=\(startDate)&"
@@ -53,8 +55,6 @@ final class WeatherAPI {
                     return
                 }
                 do {
-//                    let result = try JSONSerialization.jsonObject(with: data, options: .allowFragments)
-//                    print(result)
                     let response = try JSONDecoder().decode(WeatherResponse.self, from: data)
                     UserDefaults.standard.set(true, forKey: String.rawDateFormat())
                     completion(response)

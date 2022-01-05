@@ -10,8 +10,24 @@ import CoreLocation
 
 final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     
+    private let degreeLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 30, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+    
+    private let dateLabel: UILabel = {
+        let label = UILabel()
+        label.font = .systemFont(ofSize: 35, weight: .bold)
+        label.textColor = .white
+        label.textAlignment = .center
+        return label
+    }()
+    
     private let imageView: UIImageView = {
-        let view = UIImageView(image: UIImage(systemName: "sun.max"))
+        let view = UIImageView()
         view.tintColor = .white
         return view
     }()
@@ -26,6 +42,7 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         collection.register(WeatherCollectionViewCell.self,
                             forCellWithReuseIdentifier: WeatherCollectionViewCell.identifier)
         collection.showsHorizontalScrollIndicator = false
+        collection.layer.masksToBounds = true
         return collection
     }()
     
@@ -39,10 +56,13 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLoad() {
         super.viewDidLoad()
         navigationController?.navigationBar.tintColor = .white
-        setGradientBackGround(to: view)
+        setGradientBackGround()
         view.addSubview(imageView)
         imageView.center = view.center
-        //setGradientBackGround(to: weatherCollectionView.backgroundView!)
+        view.addSubview(degreeLabel)
+        degreeLabel.center = view.center
+        view.addSubview(dateLabel)
+        dateLabel.center = view.center
         view.addSubview(weatherCollectionView)
         weatherCollectionView.delegate = self
         weatherCollectionView.dataSource = self
@@ -56,8 +76,15 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
     override func viewDidLayoutSubviews() {
         super.viewDidLayoutSubviews()
         let imageSize: CGFloat = 200
+        let labelSize: CGFloat = 100
+        degreeLabel.frame = CGRect(x: (view.frame.size.width - labelSize) / 2,
+                                   y: view.safeAreaInsets.bottom + 10,
+                                   width: labelSize, height: labelSize)
+        dateLabel.frame = CGRect(x: (view.frame.size.width - labelSize) / 2,
+                                 y: view.safeAreaInsets.bottom + 20 + labelSize,
+                                 width: labelSize, height: labelSize)
         imageView.frame = CGRect(x: (view.frame.size.width - imageSize) / 2,
-                                 y: view.safeAreaInsets.bottom,
+                                 y: view.safeAreaInsets.bottom + 30 + 2 * labelSize,
                                  width: imageSize,
                                  height: imageSize)
         weatherCollectionView.frame = CGRect(x: 0,
@@ -66,9 +93,9 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                                              height: 220)
     }
 
-    private func setGradientBackGround(to view: UIView) {
-        gradient.colors = [UIColor.white.cgColor, UIColor.systemBlue.cgColor]
-        gradient.locations = [0.0, 1.0]
+    private func setGradientBackGround() {
+        gradient.colors = [UIColor.systemYellow.cgColor, UIColor.systemBlue.cgColor]
+        gradient.locations = [0.0, 0.7]
         gradient.startPoint = CGPoint(x: 0.0, y: 0.0)
         gradient.endPoint = CGPoint(x: 1.0, y: 1.0)
         gradient.frame = view.bounds
@@ -87,10 +114,10 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
             return .cloudy
         }
         else if degree <= 15 {
-            return dayTime == .day ? .cloudysun : .cloudymoon
+            return dayTime != .night ? .cloudysun : .cloudymoon
         }
         else {
-            return dayTime == .day ? .sunny : .clear
+            return dayTime != .night ? .sunny : .clear
         }
 
     }
@@ -148,9 +175,10 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 let time = formatter.string(from: date)
                 
                 formatter.dateFormat = "yyyy-MM-dd HH:mm"
-                let seperatorTime = formatter.date(from: "\(String.rawDateFormat()) 18:00") ?? Date()
+                let seperatorTimeNight = formatter.date(from: "\(String.rawDateFormat()) 19:00") ?? Date()
+                let seperatorTimeNoon = formatter.date(from: "\(String.rawDateFormat()) 14:00") ?? Date()
                 
-                let dayTime : DayTime = date < seperatorTime ? .day : .night
+                let dayTime : DayTime = date < seperatorTimeNight ? (date < seperatorTimeNoon ? .day : .afternoon) : .night
                 
                 let numberFormatter = NumberFormatter()
                 numberFormatter.numberStyle = .none
@@ -193,6 +221,11 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
-        gradient.colors = [UIColor.white.cgColor, UIColor.black.cgColor]
+        let model = models[indexPath.item]
+        degreeLabel.text = "\(model.airTemp)° C"
+        dateLabel.text = model.time
+        imageView.image = UIImage(systemName: model.weatherType.rawValue)
+        gradient.colors = model.dayTime == .day ? [UIColor.systemYellow.cgColor, UIColor.systemBlue.cgColor]
+                                                                 : [UIColor.white.cgColor, UIColor.black.cgColor]
     }
 }
