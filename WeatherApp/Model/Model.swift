@@ -24,9 +24,20 @@ struct WeatherViewModel: Codable {
     let airTemp: String
     let time: String
     let dayTime: DayTime
+    let weatherType : WeatherType
 }
 
 enum DayTime: Codable {
     case day
     case night
+}
+
+enum WeatherType: String, Codable {
+    case sunny = "sun.max"
+    case cloudy = "cloud"
+    case rainy = "cloud.heavyrain"
+    case snow = "snowflake"
+    case cloudysun = "cloud.sun"
+    case cloudymoon = "cloud.moon"
+    case clear = "moon"
 }

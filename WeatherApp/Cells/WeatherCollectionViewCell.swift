@@ -11,19 +11,19 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     
     static let identifier = "WeatherCollectionViewCell"
     
-    private let weatherMap: [DayTime : [String]] = {
-        var dict = [DayTime : [String]]()
-        dict[.day] = ["sun.and.horizon", "sun.haze", "sun.dust",
-                      "cloud", "cloud.rain", "cloud.sun",
-                      "cloud.sun.rain", "snowflake"]
-        dict[.night] = ["snowflake", "wind.snow", "cloud.moon.rain",
-                        "cloud.moon.bolt", "smoke", "moon.stars",
-                        "moon"]
-        
-        return dict
-    }()
+//    private let weatherMap: [DayTime : [String]] = {
+//        var dict = [DayTime : [String]]()
+//        dict[.day] = ["sun.and.horizon", "sun.haze", "sun.dust",
+//                      "cloud", "cloud.rain", "cloud.sun",
+//                      "cloud.sun.rain", "snowflake"]
+//        dict[.night] = ["snowflake", "wind.snow", "cloud.moon.rain",
+//                        "cloud.moon.bolt", "smoke", "moon.stars",
+//                        "moon"]
+//        
+//        return dict
+//    }()
     
-    private let cellLabel: UILabel = {
+    private let cellDegreeLabel: UILabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 20, weight: .semibold)
         label.textColor = .white
@@ -47,10 +47,10 @@ class WeatherCollectionViewCell: UICollectionViewCell {
     override init(frame: CGRect) {
         super.init(frame: frame)
         setGradientBackground()
-        contentView.addSubview(cellLabel)
+        contentView.addSubview(cellDegreeLabel)
         contentView.addSubview(cellImageView)
         let labelSize: CGFloat = 30
-        cellLabel.frame = CGRect(x: 0,
+        cellDegreeLabel.frame = CGRect(x: 0,
                                  y: 5,
                                  width: contentView.frame.size.width,
                                  height: labelSize)
@@ -74,23 +74,17 @@ class WeatherCollectionViewCell: UICollectionViewCell {
         contentView.layer.addSublayer(gradient)
     }
     
-    override func prepareForReuse() {
-        super.prepareForReuse()
-        
-    }
-    
     // MARK: - Configuration
     
     func configure(with viewModel: WeatherViewModel) {
-        cellLabel.text = viewModel.airTemp
+        cellDegreeLabel.text = viewModel.airTemp
         switch viewModel.dayTime {
         case .day:
             gradient.colors = [UIColor.white.cgColor, UIColor.systemBlue.cgColor]
         case.night:
             gradient.colors = [UIColor.white.cgColor, UIColor.black.cgColor]
         }
-        
-        cellImageView.image = UIImage(systemName: (weatherMap[viewModel.dayTime]?.randomElement()) ?? "cloud")
+        cellImageView.image = UIImage(systemName: viewModel.weatherType.rawValue)
     }
     
 }

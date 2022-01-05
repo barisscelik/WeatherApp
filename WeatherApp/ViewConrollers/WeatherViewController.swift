@@ -25,7 +25,6 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         let collection = UICollectionView(frame: .zero, collectionViewLayout: layout)
         collection.register(WeatherCollectionViewCell.self,
                             forCellWithReuseIdentifier: WeatherCollectionViewCell.identifier)
-        collection.prefetchDataSource = .none
         collection.showsHorizontalScrollIndicator = false
         return collection
     }()
@@ -74,6 +73,26 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
         gradient.endPoint = CGPoint(x: 1.0, y: 1.0)
         gradient.frame = view.bounds
         view.layer.addSublayer(gradient)
+    }
+    
+    private func setWeatherType(degree: Int, dayTime: DayTime) -> WeatherType {
+        
+        if degree <= 0 {
+            return .snow
+        }
+        else if degree <= 5 {
+            return .rainy
+        }
+        else if degree <= 10 {
+            return .cloudy
+        }
+        else if degree <= 15 {
+            return dayTime == .day ? .cloudysun : .cloudymoon
+        }
+        else {
+            return dayTime == .day ? .sunny : .clear
+        }
+
     }
     
     // MARK: - Location
@@ -138,7 +157,12 @@ final class WeatherViewController: UIViewController, CLLocationManagerDelegate {
                 let number = numberFormatter.number(from: "\(data.airTemperature.noaa)") ?? 0
                 let airTemp = numberFormatter.string(from: number) ?? ""
                 
-                self?.models.append(WeatherViewModel(airTemp: airTemp, time: time, dayTime: dayTime))
+                guard let weatherType = self?.setWeatherType(degree: number.intValue, dayTime: dayTime) else {
+                    return
+                }
+                
+                self?.models.append(WeatherViewModel(airTemp: airTemp, time: time,
+                                                     dayTime: dayTime, weatherType: weatherType))
                 group.leave()
             }
             
