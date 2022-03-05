@@ -222,10 +222,18 @@ extension WeatherViewController: UICollectionViewDelegate, UICollectionViewDataS
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {
         collectionView.deselectItem(at: indexPath, animated: true)
         let model = models[indexPath.item]
+        
         degreeLabel.text = "\(model.airTemp)° C"
         dateLabel.text = model.time
         imageView.image = UIImage(systemName: model.weatherType.rawValue)
-        gradient.colors = model.dayTime == .day ? [UIColor.systemYellow.cgColor, UIColor.systemBlue.cgColor]
-                                                                 : [UIColor.white.cgColor, UIColor.black.cgColor]
+        
+        switch model.dayTime {
+        case .day:
+            gradient.colors = [UIColor.systemYellow.cgColor, UIColor.systemBlue.cgColor]
+        case .afternoon:
+            gradient.colors = [UIColor.white.cgColor, UIColor.systemBlue.cgColor]
+        case .night:
+            gradient.colors = [UIColor.white.cgColor, UIColor.black.cgColor]
+        }
     }
 }
